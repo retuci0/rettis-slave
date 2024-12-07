@@ -359,7 +359,7 @@ async def afk_command(message: discord.Message) -> None:
 async def nuke_command(message: discord.Message):
     """nuke command because guest hasn't learned about for loops yet."""
     args = message.content.split(" ")
-    if args > 1:
+    if len(args) > 1:
         try:
             times = int(args[1])
         except:
