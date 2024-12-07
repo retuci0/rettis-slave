@@ -41,12 +41,6 @@ async def sex_command(message: discord.Message) -> None:
         reply = await message.channel.fetch_message(message.reference.message_id)
         await message.channel.send(f"sexed <@{reply.author.id}>")
         return
-    
-    if message.author.id == 1120699957415002212: # just for guest
-        for girl in SharedConstants.females:
-            if str(girl) in message.content:
-                await message.channel.send("nuh uh.")
-                return
 
     if len(args) < 2 or not args[1].strip():
         await message.channel.send(f"sexed no one (no bitches?)")
@@ -346,7 +340,7 @@ async def afk_command(message: discord.Message) -> None:
         SharedConstants.afk_users[message.author.id] = {"message": afk_message, "until": afk_until}
 
         time_msg = f" for {afk_minutes} min" if afk_until else ""
-        await message.channel.send(f"{message.author.mention} is now ~~masturbating~~ afk{time_msg}: {afk_message}")
+        await message.channel.send(f"{message.author.mention} is now afk{time_msg}: {afk_message}")
     except Exception as e:
         print(e)
         await message.channel.send("uh oh")
