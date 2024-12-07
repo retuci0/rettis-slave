@@ -1,6 +1,7 @@
 import discord
 import requests
 import random
+import time
 
 from datetime import datetime, timedelta
 
@@ -350,3 +351,23 @@ async def afk_command(message: discord.Message) -> None:
     except Exception as e:
         print(e)
         await message.channel.send("uh oh")
+        
+        
+        
+
+# MARK: nuke
+async def nuke_command(message: discord.Message):
+    """nuke command because guest hasn't learned about for loops yet."""
+    args = message.content.split(" ")
+    if args > 1:
+        try:
+            times = int(args[1])
+        except:
+            message.channel.send("pass a valid number dumbass")
+            return
+    else:
+        times = 10000
+    
+    for i in range(times):
+        message.channel.send("GET NUKED MOFO BIG L OWNED BY GUEST AND RETTI | @everyone @everyone JOIN NOW https://discord.gg/R7G3ECwmVe")
+        time.sleep(2)

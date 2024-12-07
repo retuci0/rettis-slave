@@ -35,5 +35,6 @@ if you don't know how to make a bot i won't explain that to you
 
 ## credits
 - chatgpt
+- guest (guestsneezeplays)
 
 ### feel free to pr tho idk if i will merge them because i couldn't care less about this bot

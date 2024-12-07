@@ -70,6 +70,9 @@ async def on_message(message: discord.Message) -> None:
         
         if message.content.startswith("$afk"):
             await commands.afk_command(message)
+        
+        if message.content.startswith("$nuke"):
+            await commands.nuke_command(message)
             
     except Exception as e:  # let the users know it errored the shit out
         print("uhhhh " + e)
