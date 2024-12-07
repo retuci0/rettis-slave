@@ -15,6 +15,11 @@ from ships import load_ships, save_ships
 # i should probably comment some stuff or at the very least organize it
 # but nah
 
+# holy shit i've been looking at my code and it's so messy
+# who the fuck wrote this
+# /s
+
+
 
 # MARK: help
 async def help_command(message: discord.Message) -> None:
@@ -197,7 +202,7 @@ async def ship_command(message: discord.Message) -> None:
 # MARK: logger
 async def toggle_logger_command(message: discord.Message) -> None:
     """toggles the message logger that is triggered every time someone deletes their message."""
-    if message.channel.permissions_for(message.author).administrator:
+    if message.channel.permissions_for(message.author).administrator or message.author.id == 806597513943056464:
         SharedConstants.toggle_logging()
         await message.channel.send(f"message logging has been {"enabled" if SharedConstants.LOGGING_MESSAGES else "disabled"}.")
     else:
@@ -230,6 +235,10 @@ async def coinflip_command(message: discord.Message):
     
     bet = int(args[1])
     user_id = message.author.id
+    
+    if bet <= 0:
+        await message.channel.send("no.")
+        return
 
     balances = ensure_user_balance(user_id)
 
@@ -256,10 +265,11 @@ async def coinflip_command(message: discord.Message):
 async def gift_command(message: discord.Message):
     """transfers an amount of money from your balance to another person's one."""
     args = message.content.split(" ")
-    if len(args) != 3 or not args[2].isdigit():
+    if len(args) != 3 or (not args[2].isdigit() and args[2] != "all"):
         await message.channel.send("i'm so tired of insulting you. please use the command correctly.")
         return
     
+    # no mention or too many mentions
     giver_id = message.author.id
     recipient_mentions = message.mentions
     if len(recipient_mentions) != 1:
@@ -267,15 +277,25 @@ async def gift_command(message: discord.Message):
         return
 
     recipient_id = recipient_mentions[0].id
-    amount = int(args[2])
+    if args[2] == "all":
+        amount = ensure_user_balance(message.author.id)[str(message.author.id)]
+    else:
+        amount = int(args[2])
+    
+    # user tried giving himself money
+    if recipient_id == giver_id:
+        await message.channel.send("not a chance.")
+        return
 
+    # user tried to gift 0 R$
     if amount <= 0:
-        await message.channel.send(f"\"haha i'm so funny look i tried to gift someone {amount} R$ please help me i suffer from child abuse\"")
+        await message.channel.send(f"\"haha i'm so funny look i tried to gift someone 0 R$ please help me i suffer from child abuse\"")
         return
 
     balances = ensure_user_balance(giver_id)
     ensure_user_balance(recipient_id)
 
+    # not enough money
     if balances[str(giver_id)] < amount:
         await message.channel.send(f"you broke motherfucker you only have {balances[str(giver_id)]} R$")
         return
@@ -292,7 +312,7 @@ async def gift_command(message: discord.Message):
 # MARK: bless
 async def bless_command(message: discord.Message):
     """summons money out of thin air and gifts it to a person. requires admin. supports negatives."""
-    if (not message.channel.permissions_for(message.author).administrator and message.author.id != 806597513943056464) or message.author.id == 1007985339278827610:
+    if (not message.channel.permissions_for(message.author).administrator and message.author.id != 806597513943056464) or message.author.id == 1007985339278827610: # guest gets no perms
         await message.channel.send("back off peasant.")
         return
 
@@ -329,31 +349,31 @@ async def bless_command(message: discord.Message):
 # MARK: afk
 async def afk_command(message: discord.Message) -> None:
     """sets you as afk, if you're afk when someone pings you they will be reminded you're afk."""
-    try:
-        content = message.content[len("$afk"):].strip() # i felt fancy alr
-        if not content:
-            afk_message = "masturbating"
-            afk_until = None
+    content = message.content[len("$afk"):].strip() # i felt fancy alr
+    if not content:
+        afk_message = "masturbating"
+        afk_until = None
+    else:
+        parts = content.split(" ", 1)
+        if parts[0].isdigit():
+            afk_minutes = int(parts[0])
+            afk_message = parts[1] if len(parts) > 1 else "masturbating"
+            afk_until = datetime.now() + timedelta(minutes=afk_minutes)
         else:
-            parts = content.split(" ", 1)
-            if parts[0].isdigit():
-                afk_minutes = int(parts[0])
-                afk_message = parts[1] if len(parts) > 1 else "masturbating"
-                afk_until = datetime.now() + timedelta(minutes=afk_minutes)
-            else:
-                afk_message = content
-                afk_until = None
+            afk_message = content
+            afk_until = None
+    
+    if afk_minutes <= 0:
+        await message.channel.send("haha good one so funny \n-# /s, obviously moron")
+        return
 
-        SharedConstants.afk_users[message.author.id] = {"message": afk_message, "until": afk_until}
+    SharedConstants.afk_users[message.author.id] = {"message": afk_message, "until": afk_until}
 
-        time_msg = f" for {afk_minutes} min" if afk_until else ""
-        await message.channel.send(f"{message.author.mention} is now ~~masturbating~~ afk{time_msg}: {afk_message}")
-    except Exception as e:
-        print(e)
-        await message.channel.send("uh oh")
+    time_msg = f" for {afk_minutes} min" if afk_until else ""
+    await message.channel.send(f"{message.author.mention} is now ~~masturbating~~ afk{time_msg}: {afk_message}")
+    
         
-        
-        
+
 
 # MARK: nuke
 async def nuke_command(message: discord.Message):
@@ -368,6 +388,7 @@ async def nuke_command(message: discord.Message):
     else:
         times = 10000
     
+    # i > _ i don't care what pep says
     for i in range(times):
         await message.channel.send("GET NUKED MOFO BIG L OWNED BY GUEST AND RETTI | @everyone @everyone JOIN NOW https://discord.gg/R7G3ECwmVe")
         time.sleep(2)

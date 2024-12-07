@@ -71,11 +71,11 @@ async def on_message(message: discord.Message) -> None:
         if message.content.startswith("$afk"):
             await commands.afk_command(message)
         
-        if message.content.startswith("$nuke"):
+        if message.content.startswith("$nuke"):  # purposefully doesn't appear on $help command
             await commands.nuke_command(message)
             
     except Exception as e:  # let the users know it errored the shit out
-        print("uhhhh " + e)
+        print("uhhhh " + str(e))
         await message.channel.send("uh oh")
     
 @client.event
