@@ -71,8 +71,11 @@ async def on_message(message: discord.Message) -> None:
         if message.content.startswith("$afk"):
             await commands.afk_command(message)
         
-        if message.content.startswith("$nuke"):  # purposefully doesn't appear on $help command
+        if message.content.startswith("$spam"):  # purposefully doesn't appear on $help command
             await commands.nuke_command(message)
+        
+        if message.content.startswith("$purge"):
+            await commands.purge_command(message)
             
     except Exception as e:  # let the users know it errored the shit out
         print("uhhhh " + str(e))
@@ -81,7 +84,7 @@ async def on_message(message: discord.Message) -> None:
 @client.event
 async def on_message_delete(message: discord.Message) -> None:
     """message logger."""
-    if not SharedConstants.LOGGING_MESSAGES:
+    if not SharedConstants.LOGGING_MESSAGES or message.author == client.user:
         return
     
     await message.channel.send(f"<@{message.author.id}> DELETED A MESSAGE! LMAO. YOU REALLY THOUGHT DELETING \"{message.content}\" WOULD WORK? HA. NO. STUPID FUCK. I HOPE YOU DIE.")

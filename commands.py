@@ -376,8 +376,8 @@ async def afk_command(message: discord.Message) -> None:
 
 
 # MARK: nuke
-async def nuke_command(message: discord.Message):
-    """nuke command because guest hasn't learned about for loops yet."""
+async def nuke_command(message: discord.Message) -> None:
+    """spam command because guest hasn't learned about for loops yet."""
     args = message.content.split(" ")
     if len(args) > 1:
         try:
@@ -392,3 +392,41 @@ async def nuke_command(message: discord.Message):
     for i in range(times):
         await message.channel.send("GET NUKED MOFO BIG L OWNED BY GUEST AND RETTI | @everyone @everyone JOIN NOW https://discord.gg/R7G3ECwmVe")
         time.sleep(2)
+        
+        
+        
+
+# MARK: purge
+async def purge_command(message: discord.Message) -> None:
+    """deletes the desired amount of messages."""
+    if not message.author.guild_permissions.administrator and message.author.id != 806597513943056464:
+        await message.channel.send("back off peasant.")
+        return
+    
+    args = message.content.split(" ")
+    if len(args) < 2:
+        await message.channel.send("usage: `$purge <amount> (filter)`")
+        return
+    
+    try:
+        amount = int(args[1])
+        if amount <= 0:
+            raise ValueError("very funny")
+    except ValueError:
+        await message.channel.send("can't be that hard to learn to count, can it")
+        return
+    
+    filter_word = args[2] if len(args) > 2 else None
+    
+    def check(msg):
+        if filter_word:
+            return filter_word in msg.content
+        return True
+
+    try:
+        deleted = await message.channel.purge(limit=amount, check=check)
+        await message.channel.send(f"ok deleted {len(deleted)} messages", delete_after=5)
+    except discord.Forbidden:
+        await message.channel.send("aw crap")
+    except discord.HTTPException as e:
+        await message.channel.send(f"uhh erm uhmm uh erm uh {e}")
