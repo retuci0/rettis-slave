@@ -2,3 +2,4 @@ recipes.json # because github will ban me again
 todo.txt
 __pycache__/
 super_secret_token.py
+.env/
