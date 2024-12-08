@@ -2,6 +2,8 @@ import commands
 import datetime
 import discord
 
+from colorama import Fore
+
 from shared_constants import SharedConstants
 from super_secret_token import TOKEN
 
@@ -20,6 +22,10 @@ async def on_message(message: discord.Message) -> None:
         # ignore message if the sender is the bot
         if message.author == client.user:
             return
+        
+        # to find out who the fuck is spamming the bot
+        if message.content.startswith("$"): # funny colors because i'm autistic
+            print(f"{Fore.RESET}[LOG] {Fore.GREEN}{message.author.display_name} ({message.author.name}) {Fore.RESET}used {Fore.CYAN}{message.content} {Fore.RESET}on {Fore.MAGENTA}{message.guild.name}{Fore.RESET}")
         
         # afk thingy
         if message.author.id in SharedConstants.afk_users:
@@ -71,15 +77,16 @@ async def on_message(message: discord.Message) -> None:
         if message.content.startswith("$afk"):
             await commands.afk_command(message)
         
-        if message.content.startswith("$spam"):  # purposefully doesn't appear on $help command
-            await commands.nuke_command(message)
+        if message.content.startswith("$spam"):
+            await commands.spam_command(message)
         
         if message.content.startswith("$purge"):
             await commands.purge_command(message)
             
-    except Exception as e:  # let the users know it errored the shit out
-        print("uhhhh " + str(e))
-        await message.channel.send("uh oh")
+    except Exception as e:  # let the users know it broke
+        if type(e) != KeyboardInterrupt:
+            print("uhhhh " + str(e))
+            await message.channel.send("uh oh")
     
 @client.event
 async def on_message_delete(message: discord.Message) -> None:
@@ -87,6 +94,17 @@ async def on_message_delete(message: discord.Message) -> None:
     if not SharedConstants.LOGGING_MESSAGES or message.author == client.user:
         return
     
-    await message.channel.send(f"<@{message.author.id}> DELETED A MESSAGE! LMAO. YOU REALLY THOUGHT DELETING \"{message.content}\" WOULD WORK? HA. NO. STUPID FUCK. I HOPE YOU DIE.")
+    print(f"{Fore.RESET}[LOG] logged a message in {Fore.RED}{message.guild.name}{Fore.RESET}")
+    
+    # attachments
+    content = message.content
+    if message.attachments:
+        for attachment in message.attachments:
+            await message.channel.send(f"<@{message.author.id}> imagine trying to delete {attachment.url}")
+            
+    if not content.strip():
+        return
+    
+    await message.channel.send(f"<@{message.author.id}> DELETED A MESSAGE! LMAO. YOU REALLY THOUGHT DELETING \"{content}\" WOULD WORK? HA. NO. STUPID FUCK. I HOPE YOU DIE.")
 
 client.run(TOKEN)

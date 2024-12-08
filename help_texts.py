@@ -1,6 +1,6 @@
 info = {
     "help": "what do you think this does moron \n`$help (command)`",
-    "sex": "sexes people.\n `$sex <user pings separated by spaces`>",
+    "sex": "sexes people.\n `$sex <user pings separated by spaces>`",
     "balance": "shows your current balance in retdollars (R$ ARE NOT ROBUX), or another user's one \n `$balance (user ping)`",
     "cf or coinflip": "50-50 chance of winning or losing your bet. gambling is awesome. \n `$cf <amount>`",
     "gift": "transfers the desired amount of R$ to the desired user \n`$gift <user ping> <amount>`",
@@ -8,8 +8,10 @@ info = {
     "ship": "returns a random percentage of \"love\" between two people. percentages are persistent (stored). \n`$ship <user1> <user2>`",
     "togglelogger": "toggles the message logger. requires admin. \n`$togglelogger`",
     "recipe": "shows recipes for \"stuff\", if available. \n`$recipe <name>`",
-    "rape": "DOES NOT RAPE A PERSON. it uses the dlink 9.8 vuln thing on an ip address, added it because i'm bored. to use it on fr*nch fucks, search for some on fofa. \n`$rape http://<ip>",
-    "afk": "makes it so that if you've been set to afk every time someone pings you they will be notified you are afk. \n`$afk (amount of time in minutes) (reason / cause)`"
+    "rape": "DOES NOT RAPE A PERSON. it uses the dlink 9.8 vuln thing on an ip address, added it because i'm bored. to use it on fr*nch fucks, search for some on fofa. \n`$rape http://<ip>`",
+    "afk": "makes it so that if you've been set to afk every time someone pings you they will be notified you are afk. \n`$afk (amount of time in minutes) (reason / cause)`",
+    "spam": "totally does not spam. \n`$spam (amount of messages)`",
+    "purge": "mass deletes messages, for moderation purposes. also has a filter option, it can delete only messages that have that specific filter: \n`$purge <amount of messages> (filter)`"
 }
 
 text = """
@@ -25,6 +27,8 @@ very epick commands (prefix is $):
 - gift: transfers the desired amount of money to the desired user (usage: `$gift <user> <amount>)
 - bless: summons money out of thin air and gives it to someone. requires admin.
 - afk: sets you as afk.
+- spam: if you're a mod and you're reading this it totally does not spam. otherwise, it spams.
+- purge: deletes messages.
 
 if command returns \"uh oh\" means it errored the fuck out.
 """

@@ -19,6 +19,8 @@ from ships import load_ships, save_ships
 # who the fuck wrote this
 # /s
 
+# for those who don't know what "# MARK" means, it just makes the text following it appear bigger on the vscode minimap, making the code easier to navigate. it does not mean my name is mark.
+
 
 
 # MARK: help
@@ -43,22 +45,25 @@ async def sex_command(message: discord.Message) -> None:
     """sexes people, unless you're guest and trying to sex a female, in which case you are physically unable to."""
     args = message.content.split(" ")
     
-    if message.reference:
-        reply = await message.channel.fetch_message(message.reference.message_id)
-        await message.channel.send(f"sexed <@{reply.author.id}>")
-        return
-    
-    if message.author.id == 1120699957415002212: # just for guest
+    if message.author.id == 1120699957415002212:  # just for guest
         for girl in SharedConstants.females:
             if str(girl) in message.content:
                 await message.channel.send("nuh uh.")
                 return
 
-    if len(args) < 2 or not args[1].strip():
+    # no user to sex :(
+    if len(args) < 2 or not args[1].strip() and not message.reference:
         await message.channel.send(f"sexed no one (no bitches?)")
         return
     
-    mentioned_user = message.mentions
+    # sex by replying to someone's message
+    mentioned_user = list(message.mentions)
+    if message.reference:
+        reply = await message.channel.fetch_message(message.reference.message_id)
+        author = await message.guild.fetch_member(reply.author.id)
+        if author not in mentioned_user:
+            mentioned_user.append(author)
+    
     if mentioned_user:
         if message.author in mentioned_user:
             await message.channel.send("did you just try to sex yourself")
@@ -99,7 +104,7 @@ async def recipe_command(message: discord.Message) -> None:
 
 
 
-# MARK: dlink
+# MARK: dlink thingy
 async def dlink_command(message: discord.Message) -> None:
     """uses the 9.8 critical score vulnerability discovered on some dlink routers on an ip address."""
     args = message.content.split(" ")
@@ -165,8 +170,12 @@ async def ship_command(message: discord.Message) -> None:
             await message.channel.send("die nerd")
             return
     
+    if message.author.id in (user1, user2):
+        await message.channel.send("pathetic")
+        return
+    
     if user1 == user2:
-        await message.channel.send("you're trying to ship yourself. no comment.")
+        await message.channel.send("go fuck yourself")
         return
 
     pair_key = " ".join(sorted([str(user1), str(user2)]))
@@ -350,33 +359,30 @@ async def bless_command(message: discord.Message):
 async def afk_command(message: discord.Message) -> None:
     """sets you as afk, if you're afk when someone pings you they will be reminded you're afk."""
     content = message.content[len("$afk"):].strip() # i felt fancy alr
-    if not content:
-        afk_message = "masturbating"
-        afk_until = None
-    else:
+    afk_message = "masturbating"
+    afk_until = None
+    
+    if content:
         parts = content.split(" ", 1)
         if parts[0].isdigit():
             afk_minutes = int(parts[0])
+            if afk_minutes <= 0:
+                await message.channel.send("haha good one so funny \n-# /s, obviously moron")
+                return
             afk_message = parts[1] if len(parts) > 1 else "masturbating"
             afk_until = datetime.now() + timedelta(minutes=afk_minutes)
         else:
             afk_message = content
-            afk_until = None
-    
-    if afk_minutes <= 0:
-        await message.channel.send("haha good one so funny \n-# /s, obviously moron")
-        return
-
+        
     SharedConstants.afk_users[message.author.id] = {"message": afk_message, "until": afk_until}
-
     time_msg = f" for {afk_minutes} min" if afk_until else ""
     await message.channel.send(f"{message.author.mention} is now ~~masturbating~~ afk{time_msg}: {afk_message}")
-    
+        
+            
         
 
-
 # MARK: nuke
-async def nuke_command(message: discord.Message) -> None:
+async def spam_command(message: discord.Message) -> None:
     """spam command because guest hasn't learned about for loops yet."""
     args = message.content.split(" ")
     if len(args) > 1:
@@ -391,7 +397,7 @@ async def nuke_command(message: discord.Message) -> None:
     # i > _ i don't care what pep says
     for i in range(times):
         await message.channel.send("GET NUKED MOFO BIG L OWNED BY GUEST AND RETTI | @everyone @everyone JOIN NOW https://discord.gg/R7G3ECwmVe")
-        time.sleep(2)
+        time.sleep(0.1) # discord ratelimit is 1000 requests per minute, which would be 0.0625 seconds between each request but i raised the cooldown to avoid any ratelimits
         
         
         
