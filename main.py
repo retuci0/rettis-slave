@@ -19,6 +19,9 @@ async def on_ready() -> None:
 @client.event
 async def on_message(message: discord.Message) -> None:
     try:
+        if not message.content.startswith("$"):
+            return
+        
         # ignore message if the sender is the bot
         if message.author == client.user:
             return
@@ -62,7 +65,7 @@ async def on_message(message: discord.Message) -> None:
         if message.content.startswith("$togglelogger"):
             await commands.toggle_logger_command(message)
         
-        if message.content.startswith("$balance"):
+        if message.content.startswith("$balance") or message.content.startswith("$bal"):
             await commands.balance_command(message)
         
         if message.content.startswith("$cf") or message.content.startswith("$coinflip"):
@@ -82,6 +85,9 @@ async def on_message(message: discord.Message) -> None:
         
         if message.content.startswith("$purge"):
             await commands.purge_command(message)
+        
+        if message.content.startswith("$roulette"):
+            await commands.roulette_command(message)
             
     except Exception as e:  # let the users know it broke
         if type(e) != KeyboardInterrupt:
@@ -103,6 +109,10 @@ async def on_message_delete(message: discord.Message) -> None:
             await message.channel.send(f"<@{message.author.id}> imagine trying to delete {attachment.url}")
             
     if not content.strip():
+        return
+
+    if len(content) > 3000:
+        await message.channel.send(f"<@{message.author.id}> fuck you")
         return
     
     await message.channel.send(f"<@{message.author.id}> DELETED A MESSAGE! LMAO. YOU REALLY THOUGHT DELETING \"{content}\" WOULD WORK? HA. NO. STUPID FUCK. I HOPE YOU DIE.")

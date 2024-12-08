@@ -24,5 +24,6 @@ ingredients:
 4. add the magnesium strip and light it up. it will produce a very bright white light.
 5. run away because it will burn at 2500 degrees celsius, which when translated to shoot shooting is like 4000 fahrenheir or however the fuck it's spelt.
     """,
-    "nuke": "https://cdn.discordapp.com/attachments/1312208805097898004/1314988981871579166/vJJeCQN.mp4?ex=6755c66c&is=675474ec&hm=7f1c624796459c97cc3f9ad86a06d1913fdf681f95407c4814e1729960e341d6&"
+    "nuke": "https://cdn.discordapp.com/attachments/1312208805097898004/1314988981871579166/vJJeCQN.mp4?ex=6755c66c&is=675474ec&hm=7f1c624796459c97cc3f9ad86a06d1913fdf681f95407c4814e1729960e341d6&",
+    "pipebomb": "https://cdn.discordapp.com/attachments/1312208805097898004/1315368817274130473/69bUqFF.mp4?ex=6757282c&is=6755d6ac&hm=fa422ff9c1e9ddda8ac048dcf565ac2fcd92e4491aa6d50949aa97507d0e53c6&"
 }

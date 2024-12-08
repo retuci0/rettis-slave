@@ -11,7 +11,8 @@ info = {
     "rape": "DOES NOT RAPE A PERSON. it uses the dlink 9.8 vuln thing on an ip address, added it because i'm bored. to use it on fr*nch fucks, search for some on fofa. \n`$rape http://<ip>`",
     "afk": "makes it so that if you've been set to afk every time someone pings you they will be notified you are afk. \n`$afk (amount of time in minutes) (reason / cause)`",
     "spam": "totally does not spam. \n`$spam (amount of messages)`",
-    "purge": "mass deletes messages, for moderation purposes. also has a filter option, it can delete only messages that have that specific filter: \n`$purge <amount of messages> (filter)`"
+    "purge": "mass deletes messages, for moderation purposes. also has a filter option, it can delete only messages that have that specific filter: \n`$purge <amount of messages> (filter)`",
+    "roulette": "GAMBLEING!!1!1!!1!!! \n`$roulette <red|black|low|high|1-36|0|00> <amount>` (e.g.: `$roulette red 50`). RUSSIAN IS NOT A BET TYPE WALDO"
 }
 
 text = """
@@ -29,6 +30,7 @@ very epick commands (prefix is $):
 - afk: sets you as afk.
 - spam: if you're a mod and you're reading this it totally does not spam. otherwise, it spams.
 - purge: deletes messages.
+- roulette: epick gambleing american roulette
 
 if command returns \"uh oh\" means it errored the fuck out.
 """

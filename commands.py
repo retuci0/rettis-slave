@@ -50,11 +50,6 @@ async def sex_command(message: discord.Message) -> None:
             if str(girl) in message.content:
                 await message.channel.send("nuh uh.")
                 return
-
-    # no user to sex :(
-    if len(args) < 2 or not args[1].strip() and not message.reference:
-        await message.channel.send(f"sexed no one (no bitches?)")
-        return
     
     # sex by replying to someone's message
     mentioned_user = list(message.mentions)
@@ -63,6 +58,11 @@ async def sex_command(message: discord.Message) -> None:
         author = await message.guild.fetch_member(reply.author.id)
         if author not in mentioned_user:
             mentioned_user.append(author)
+
+    # no user to sex :(
+    if (len(args) < 2 or not args[1].strip()) and not message.reference:
+        await message.channel.send(f"sexed no one (no bitches?)")
+        return
     
     if mentioned_user:
         if message.author in mentioned_user:
@@ -170,7 +170,7 @@ async def ship_command(message: discord.Message) -> None:
             await message.channel.send("die nerd")
             return
     
-    if message.author.id in (user1, user2):
+    if message.author.id == user1 and message.author.id == user2:
         await message.channel.send("pathetic")
         return
     
@@ -238,18 +238,21 @@ async def balance_command(message: discord.Message):
 async def coinflip_command(message: discord.Message):
     """either doubles or loses your bet. martingale strategy goes brrrrr"""
     args = message.content.split(" ")
-    if len(args) != 2 or not args[1].isdigit():
-        await message.channel.send("you moron just use `$cf <amount>`. fuck you.")
+    if len(args) != 2 or (not args[1].isdigit() and args[1].lower().strip() != "all"):
+        await message.channel.send("you moron just use `$cf <amount>` or `$cf all`. fuck you.")
         return
-    
-    bet = int(args[1])
+
     user_id = message.author.id
-    
+    balances = ensure_user_balance(user_id)
+
+    if args[1].lower().strip() == "all":
+        bet = balances[str(user_id)]
+    else:
+        bet = int(args[1])
+
     if bet <= 0:
         await message.channel.send("no.")
         return
-
-    balances = ensure_user_balance(user_id)
 
     if balances[str(user_id)] < bet:
         await message.channel.send(f"LMAO YOU'RE SO BROKE. YOUR POOR ASS HAS {balances[str(user_id)]} R$ GET A FUCKING JOB")
@@ -264,7 +267,6 @@ async def coinflip_command(message: discord.Message):
         result = f"take the L bozo. you lost it all, {bet} R$ less. new balance: {balances[str(user_id)]} R$. skill FUCKING issue."
 
     save_balances(balances)
-
     await message.channel.send(result)
 
 
@@ -384,6 +386,10 @@ async def afk_command(message: discord.Message) -> None:
 # MARK: nuke
 async def spam_command(message: discord.Message) -> None:
     """spam command because guest hasn't learned about for loops yet."""
+    if message.author.id in SharedConstants.fucking_idiots:
+        await message.channel.send("no.")
+        return
+    
     args = message.content.split(" ")
     if len(args) > 1:
         try:
@@ -436,3 +442,82 @@ async def purge_command(message: discord.Message) -> None:
         await message.channel.send("aw crap")
     except discord.HTTPException as e:
         await message.channel.send(f"uhh erm uhmm uh erm uh {e}")
+    
+    
+    
+    
+# MARK: roulette
+async def roulette_command(message: discord.Message):
+    """funy gambleing"""
+    args = message.content.split()
+    if len(args) < 3 or not args[2].isdigit():
+        await message.channel.send("use the command properly: `$roulette <bet_type> <amount>`. > `$roulette red 50`, `$roulette 17 100` (wtf no insult?)")
+        return
+
+    bet_type = args[1].lower()
+    bet_amount = int(args[2])
+    user_id = message.author.id
+
+    if bet_amount <= 0:
+        await message.channel.send("no.")
+        return
+
+    balances = ensure_user_balance(user_id)
+    if balances[str(user_id)] < bet_amount:
+        await message.channel.send(f"YOU'RE SO BROKE. YOUR POOR ASS ONLY HAS {balances[str(user_id)]} R$. GET A JOB.")
+        return
+
+    valid_bets = ["red", "black", "odd", "even", "high", "low", "0", "00"] + [str(i) for i in range(1, 37)]
+    if bet_type not in valid_bets:
+        await message.channel.send("you analphabet (haha anal). bet to something like `red`, `17`, `even`, `low`, etc.")
+        return
+
+    payout = {
+        "red": 2, "black": 2, "odd": 2, "even": 2,
+        "high": 2, "low": 2, "0": 36, "00": 36
+    }
+    wheel = {
+        "red": [1, 3, 5, 7, 9, 12, 14, 16, 18, 19, 21, 23, 25, 27, 30, 32, 34, 36],
+        "black": [2, 4, 6, 8, 10, 11, 13, 15, 17, 20, 22, 24, 26, 28, 29, 31, 33, 35],
+        "green": [0, "00"]
+    }
+
+    result = random.choice(wheel["red"] + wheel["black"] + wheel["green"])
+    outcome = "red" if result in wheel["red"] else "black" if result in wheel["black"] else "green"
+
+    additional_info = []
+    if isinstance(result, int):
+        if result % 2 == 0:
+            additional_info.append("even")
+        else:
+            additional_info.append("odd")
+        if 1 <= result <= 18:
+            additional_info.append("low")
+        elif 19 <= result <= 36:
+            additional_info.append("high")
+
+    win = False
+    if bet_type.isdigit():
+        win = int(bet_type) == result
+    elif bet_type in ["red", "black", "odd", "even", "high", "low"]:
+        if bet_type == outcome:
+            win = True
+        elif bet_type == "odd" and isinstance(result, int) and result % 2 != 0:
+            win = True
+        elif bet_type == "even" and isinstance(result, int) and result % 2 == 0:
+            win = True
+        elif bet_type == "high" and isinstance(result, int) and 19 <= result <= 36:
+            win = True
+        elif bet_type == "low" and isinstance(result, int) and 1 <= result <= 18:
+            win = True
+
+    if win:
+        multiplier = payout.get(bet_type, 1)
+        winnings = bet_amount * (multiplier - 1)
+        balances[str(user_id)] += winnings
+        save_balances(balances)
+        await message.channel.send(f"ok the bouncy sphere landed on {result} ({outcome}, {' '.join(additional_info)}). so i guess you won {winnings} R$. new balance: {balances[str(user_id)]} R$. epick gambleing!!1!!1!")
+    else:
+        balances[str(user_id)] -= bet_amount
+        save_balances(balances)
+        await message.channel.send(f"skill issue. the rotund tridimensional object landed on {result} ({outcome}, {' '.join(additional_info)}). {bet_amount} R$ less. new: {balances[str(user_id)]} R$")
