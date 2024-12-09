@@ -9,7 +9,8 @@ from dlink_thingy import exploit, verify
 from gamble import ensure_user_balance, load_balances, save_balances
 from help_texts import info, text
 from recipes import recipes
-from shared_constants import SharedConstants
+from utils import SharedConstants, is_peasant
+from sex import load_sex_counts, save_sex_counts
 from ships import load_ships, save_ships
 
 # i should probably comment some stuff or at the very least organize it
@@ -43,8 +44,9 @@ async def help_command(message: discord.Message) -> None:
 # MARK: sex
 async def sex_command(message: discord.Message) -> None:
     """sexes people, unless you're guest and trying to sex a female, in which case you are physically unable to."""
-    args = message.content.split(" ")
+    counts = load_sex_counts()
     
+    args = message.content.split(" ")
     if message.author.id == 1120699957415002212:  # just for guest
         for girl in SharedConstants.females:
             if str(girl) in message.content:
@@ -64,21 +66,41 @@ async def sex_command(message: discord.Message) -> None:
         await message.channel.send(f"sexed no one (no bitches?)")
         return
     
+    # if mentioned_user:
+    #     if message.author in mentioned_user:
+    #         await message.channel.send("did you just try to sex yourself")
+    #         return
+        
+    #     if mentioned_user.__len__() > 1:
+    #         text = "sexed "
+    #         for user in mentioned_user:
+    #             text += f"<@{user.id}>"
+    #             if mentioned_user[-1] != user:
+    #                 text += " and "
+    #         await message.channel.send(text)
+    #     else:
+    #         await message.channel.send(f"sexed <@{mentioned_user[0].id}>")
+    #         return
+    # else:
+    #     await message.channel.send(f"sexed {' '.join(args[1:])}")
+    
     if mentioned_user:
         if message.author in mentioned_user:
             await message.channel.send("did you just try to sex yourself")
             return
-        
-        if mentioned_user.__len__() > 1:
-            text = "sexed "
-            for user in mentioned_user:
-                text += f"<@{user.id}>"
-                if mentioned_user[-1] != user:
-                    text += " and "
-            await message.channel.send(text)
-        else:
-            await message.channel.send(f"sexed <@{mentioned_user[0].id}>")
-            return
+
+        for user in mentioned_user:
+            counts.setdefault(str(user.id), {"sexed": 0, "been_sexed": 0})
+            counts.setdefault(str(message.author.id), {"sexed": 0, "been_sexed": 0})
+
+            counts[str(message.author.id)]["sexed"] += 1
+            counts[str(user.id)]["been_sexed"] += 1
+
+        save_sex_counts(counts)
+
+        text = "sexed "
+        text += " and ".join([f"<@{user.id}>" for user in mentioned_user])
+        await message.channel.send(text)
     else:
         await message.channel.send(f"sexed {' '.join(args[1:])}")
 
@@ -127,7 +149,7 @@ async def dlink_command(message: discord.Message) -> None:
         request = requests.get(url)
     except Exception as e:
         await message.channel.send("uh oh")
-        print(type(e).__name__)
+        print(e)
         return
     
     if request.status_code != 200:
@@ -210,12 +232,28 @@ async def ship_command(message: discord.Message) -> None:
 
 # MARK: logger
 async def toggle_logger_command(message: discord.Message) -> None:
-    """toggles the message logger that is triggered every time someone deletes their message."""
-    if message.channel.permissions_for(message.author).administrator or message.author.id == 806597513943056464:
-        SharedConstants.toggle_logging()
-        await message.channel.send(f"message logging has been {"enabled" if SharedConstants.LOGGING_MESSAGES else "disabled"}.")
-    else:
+    """toggles the message logger that is triggered every time someone deletes or edits their message."""
+    if is_peasant(message.author):
         await message.channel.send("who do you think you are to try and run this command? do you think you're important or something? you're not. fuck off you peasant.")
+        return
+    
+    args = message.content.split(" ")
+    
+    try:
+        match args[1].lower():
+            case "on" | "1":
+                SharedConstants.LOGGING_MESSAGES = True
+            case "off" | "0":
+                SharedConstants.LOGGING_MESSAGES = False
+            case "query" | "get":
+                await message.channel.send(f"anti racism module is currently {"enabled" if SharedConstants.LOGGING_MESSAGES else "disabled"}")
+                return
+            case _:
+                SharedConstants.toggle_logging()
+    except:
+        pass    
+     
+    await message.channel.send(f"message logging has been {"enabled" if SharedConstants.LOGGING_MESSAGES else "disabled"}.")        
 
 
 
@@ -323,7 +361,7 @@ async def gift_command(message: discord.Message):
 # MARK: bless
 async def bless_command(message: discord.Message):
     """summons money out of thin air and gifts it to a person. requires admin. supports negatives."""
-    if (not message.channel.permissions_for(message.author).administrator and message.author.id != 806597513943056464) or message.author.id == 1007985339278827610: # guest gets no perms
+    if is_peasant(message.author):
         await message.channel.send("back off peasant.")
         return
 
@@ -411,7 +449,7 @@ async def spam_command(message: discord.Message) -> None:
 # MARK: purge
 async def purge_command(message: discord.Message) -> None:
     """deletes the desired amount of messages."""
-    if not message.author.guild_permissions.administrator and message.author.id != 806597513943056464:
+    if is_peasant(message.author):
         await message.channel.send("back off peasant.")
         return
     
@@ -439,7 +477,7 @@ async def purge_command(message: discord.Message) -> None:
         deleted = await message.channel.purge(limit=amount, check=check)
         await message.channel.send(f"ok deleted {len(deleted)} messages", delete_after=5)
     except discord.Forbidden:
-        await message.channel.send("aw crap")
+        await message.channel.send("aw crap i got no perms D:")
     except discord.HTTPException as e:
         await message.channel.send(f"uhh erm uhmm uh erm uh {e}")
     
@@ -447,7 +485,7 @@ async def purge_command(message: discord.Message) -> None:
     
     
 # MARK: roulette
-async def roulette_command(message: discord.Message):
+async def roulette_command(message: discord.Message) -> None:
     """funy gambleing"""
     args = message.content.split()
     if len(args) < 3 or not args[2].isdigit():
@@ -521,3 +559,23 @@ async def roulette_command(message: discord.Message):
         balances[str(user_id)] -= bet_amount
         save_balances(balances)
         await message.channel.send(f"skill issue. the rotund tridimensional object landed on {result} ({outcome}, {' '.join(additional_info)}). {bet_amount} R$ less. new: {balances[str(user_id)]} R$")
+        
+        
+        
+# MARK: sex stats
+async def sex_stats_command(message: discord.Message) -> None:
+    """sex stats."""
+    counts = load_sex_counts()
+    user = message.mentions[0] if message.mentions else message.author
+    stats = counts.get(str(user.id), {"sexed": 0, "been_sexed": 0})
+    
+    sexer_text = str()
+    sexed_text = str()
+    if stats["sexed"] >= 100:
+        sexer_text = "(holy crap bro) "
+    elif stats["sexed"] <= 0:
+        sexer_text = "(fucking geek go outside) "
+    if stats["been_sexed"] > 50:
+        sexed_text = "(fucking whore)"
+    
+    await message.channel.send(f"<@{user.id}> has sexed {stats["sexed"]} people {sexer_text}and been sexed {stats["been_sexed"]} times {sexed_text}")
