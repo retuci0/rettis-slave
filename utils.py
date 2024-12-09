@@ -4,9 +4,9 @@ class SharedConstants:
     LOGGING_MESSAGES: bool = True
     
     females: tuple = (
-        842116081241030717,
-        820202458844364830,
-        1092602287765074070
+        842116081241030717, # girl 1
+        820202458844364830, # girl 2
+        1092602287765074070 # moono
     )
     
     afk_users: dict = {}

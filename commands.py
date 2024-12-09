@@ -6,12 +6,10 @@ import time
 from datetime import datetime, timedelta
 
 from dlink_thingy import exploit, verify
-from gamble import ensure_user_balance, load_balances, save_balances
+from data import ensure_user_balance, load_balances, save_balances, load_sex_counts, save_sex_counts, load_ships, save_ships
 from help_texts import info, text
 from recipes import recipes
 from utils import SharedConstants, is_peasant
-from sex import load_sex_counts, save_sex_counts
-from ships import load_ships, save_ships
 
 # i should probably comment some stuff or at the very least organize it
 # but nah
@@ -66,24 +64,6 @@ async def sex_command(message: discord.Message) -> None:
         await message.channel.send(f"sexed no one (no bitches?)")
         return
     
-    # if mentioned_user:
-    #     if message.author in mentioned_user:
-    #         await message.channel.send("did you just try to sex yourself")
-    #         return
-        
-    #     if mentioned_user.__len__() > 1:
-    #         text = "sexed "
-    #         for user in mentioned_user:
-    #             text += f"<@{user.id}>"
-    #             if mentioned_user[-1] != user:
-    #                 text += " and "
-    #         await message.channel.send(text)
-    #     else:
-    #         await message.channel.send(f"sexed <@{mentioned_user[0].id}>")
-    #         return
-    # else:
-    #     await message.channel.send(f"sexed {' '.join(args[1:])}")
-    
     if mentioned_user:
         if message.author in mentioned_user:
             await message.channel.send("did you just try to sex yourself")
@@ -103,6 +83,10 @@ async def sex_command(message: discord.Message) -> None:
         await message.channel.send(text)
     else:
         await message.channel.send(f"sexed {' '.join(args[1:])}")
+    
+    # funny
+    if random.randint(1, 11) == 11:
+        await message.channel.send("https://cdn.discordapp.com/attachments/1312208805097898004/1315651481973686333/poundtown-hip-thrust.mov?ex=67582f6c&is=6756ddec&hm=97b04f47923793489e0244d0216d170737efe82215c612d0b7668490625d16c8&")
 
 
 
@@ -117,6 +101,13 @@ async def recipe_command(message: discord.Message) -> None:
         return
     
     recipe_name = args[1].lower().strip()
+    if recipe_name == "list":
+        recipes_text = "available recipes: "
+        for recipe in sorted(list(recipes.keys())):
+            recipes_text += recipe + ", "
+        recipes_text = recipes_text.strip(", ")
+        await message.channel.send(recipes_text)
+        return
     
     try:
         await message.channel.send(recipes[recipe_name])

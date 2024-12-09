@@ -18,6 +18,10 @@ async def on_ready() -> None:
     print(f"uhh hi i guess")
 
 @client.event
+async def on_disconnect() -> None:
+    print(f"ok bye")
+
+@client.event
 async def on_message(message: discord.Message) -> None:
     try:
         # ignore message if the sender is the bot
@@ -54,6 +58,7 @@ async def on_message(message: discord.Message) -> None:
             return
         
         # to find out who the fuck is spamming the bot
+        # i refuse to use logging module
         print(f"{Fore.RESET}[LOG] {Fore.GREEN}{message.author.display_name} ({message.author.name}) {Fore.RESET}used {Fore.CYAN}{message.content} {Fore.RESET}on {Fore.MAGENTA}{message.guild.name}{Fore.RESET}")
 
         # commands
@@ -105,7 +110,7 @@ async def on_message(message: discord.Message) -> None:
     except Exception as e:  # let the users know it broke
         if not isinstance(e, KeyboardInterrupt):
             tb = traceback.format_exc()
-            print(f"uhhhh {type(e).__name__}: {e}\n{tb}")
+            print(f"uhhhh we just got a(n) {type(e).__name__}: {e}\n{tb}")
             await message.channel.send("uh oh")
     
 @client.event
@@ -154,5 +159,7 @@ async def on_message_edit(old_message: discord.Message, message: discord.Message
         return
     
     await message.reply(f"<@{message.author.id}> edited this message because he has severe autism \nold content: \"{content}\"")
-    
-client.run(TOKEN)
+
+
+if __name__ == "__main__":
+    client.run(TOKEN)

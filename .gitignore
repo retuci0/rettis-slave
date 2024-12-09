@@ -1,5 +1,9 @@
-recipes.json # because github will ban me again
+recipes.py  # because github will ban me again
 todo.txt
 __pycache__/
 super_secret_token.py
 .env/
+*.log
+balances.json
+sex_counts.json
+ships.json

@@ -3,7 +3,7 @@
 
 ## commands
 - prefix is $
-- run help command too see all commands
+- run `$help` command too see all commands
 - run `$help (command)` to obtain extra info about that specific command
 
 if a command returns "uh oh" means it errored the fuck out.
@@ -26,7 +26,8 @@ if you don't know how to make a bot i won't explain that to you
 ## notes
 
 - recipes command won't work because you have to add your own recipes. github doesn't like me adding my own.
-- there's some user ids left in there. if it bothers you just delete them or replace them.
+- to make recipes work you need to create `recipes.py` and add `recipes = {}` and then add your recipes in there.
+- in case you don't know how to just google "how to make python dictionary entries"
 
 ## credits
 - chatgpt

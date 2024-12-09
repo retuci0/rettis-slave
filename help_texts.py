@@ -7,7 +7,7 @@ info = {
     "bless": "summons money and gifts it to the desired person, instead of transferring it, kinda like a /give. requires admin. supports negative numbers. \n`$bless <user ping> <amount>`",
     "ship": "returns a random percentage of \"love\" between two people. percentages are persistent (stored). \n`$ship <user1> <user2>` or `$ship <user>` to ship yourself with that user.",
     "togglelogger": "toggles the message logger. requires admin. \n`$togglelogger (on|off|1|0|query|get)`",
-    "recipe": "shows recipes for \"stuff\", if available. \n`$recipe <name>`",
+    "recipe": "shows recipes for \"stuff\", if available. \n`$recipe <name|list>`",
     "rape": "DOES NOT RAPE A PERSON. it uses the dlink 9.8 vuln thing on an ip address, added it because i'm bored. to use it on fr*nch fucks, search for some on fofa. \n`$rape http://<ip>`",
     "afk": "sets you as afk, and lets other people know you are if they ping you. \n`$afk (amount of time in minutes) (reason / cause)`",
     "spam": "totally does not spam. \n`$spam (amount of messages)`",
