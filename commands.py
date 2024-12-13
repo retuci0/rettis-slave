@@ -1,3 +1,4 @@
+import aiohttp
 import discord
 import requests
 import random
@@ -9,7 +10,9 @@ from dlink_thingy import exploit, verify
 from data import ensure_user_balance, load_balances, save_balances, load_sex_counts, save_sex_counts, load_ships, save_ships
 from help_texts import info, text
 from recipes import recipes
-from utils import SharedConstants, is_peasant
+from utils import SharedConstants, is_peasant, send_message
+
+from super_secret_token import TOKEN
 
 # i should probably comment some stuff or at the very least organize it
 # but nah
@@ -27,14 +30,14 @@ async def help_command(message: discord.Message) -> None:
     """displays all available commands."""
     args = message.content.split(" ")
     if len(args) != 2:
-        await message.channel.send(text)
+        await send_message(message, text)
         return
     
     command = args[1].lower().strip()
     try:
-        await message.channel.send(info[command])
+        await send_message(message, info[command])
     except KeyError:
-        await message.channel.send(f"{command} is not an indexed command, you cunt. use `$help` to see all available commands.")
+        await send_message(message, f"{command} is not an indexed command, you cunt. use `$help` to see all available commands.")
 
 
 
@@ -48,7 +51,7 @@ async def sex_command(message: discord.Message) -> None:
     if message.author.id == 1120699957415002212:  # just for guest
         for girl in SharedConstants.females:
             if str(girl) in message.content:
-                await message.channel.send("nuh uh.")
+                await send_message(message, "nuh uh.")
                 return
     
     # sex by replying to someone's message
@@ -61,12 +64,12 @@ async def sex_command(message: discord.Message) -> None:
 
     # no user to sex :(
     if (len(args) < 2 or not args[1].strip()) and not message.reference:
-        await message.channel.send(f"sexed no one (no bitches?)")
+        await send_message(message, f"sexed no one (no bitches?)")
         return
     
     if mentioned_user:
         if message.author in mentioned_user:
-            await message.channel.send("did you just try to sex yourself")
+            await send_message(message, "did you just try to sex yourself")
             return
 
         for user in mentioned_user:
@@ -80,13 +83,13 @@ async def sex_command(message: discord.Message) -> None:
 
         text = "sexed "
         text += " and ".join([f"<@{user.id}>" for user in mentioned_user])
-        await message.channel.send(text)
+        await send_message(message, text)
     else:
-        await message.channel.send(f"sexed {' '.join(args[1:])}")
+        await send_message(message, f"sexed {' '.join(args[1:])}")
     
     # funny
     if random.randint(1, 11) == 11:
-        await message.channel.send("https://cdn.discordapp.com/attachments/1312208805097898004/1315651481973686333/poundtown-hip-thrust.mov?ex=67582f6c&is=6756ddec&hm=97b04f47923793489e0244d0216d170737efe82215c612d0b7668490625d16c8&")
+        await send_message(message, "https://cdn.discordapp.com/attachments/1312208805097898004/1315651481973686333/poundtown-hip-thrust.mov?ex=67582f6c&is=6756ddec&hm=97b04f47923793489e0244d0216d170737efe82215c612d0b7668490625d16c8&")
 
 
 
@@ -97,7 +100,7 @@ async def recipe_command(message: discord.Message) -> None:
     args = message.content.split(" ")
     
     if len(args) < 2 or not args[1].strip():
-        await message.channel.send("you fucking moron you want a recipe for something right you don't want to cook thin air you dumbfuck do you")
+        await send_message(message, "you fucking moron you want a recipe for something right you don't want to cook thin air you dumbfuck do you")
         return
     
     recipe_name = args[1].lower().strip()
@@ -106,13 +109,13 @@ async def recipe_command(message: discord.Message) -> None:
         for recipe in sorted(list(recipes.keys())):
             recipes_text += recipe + ", "
         recipes_text = recipes_text.strip(", ")
-        await message.channel.send(recipes_text)
+        await send_message(message, recipes_text)
         return
     
     try:
-        await message.channel.send(recipes[recipe_name])
+        await send_message(message, recipes[recipe_name])
     except KeyError:
-        await message.channel.send("no such recipe is available yet (let me cook)")
+        await send_message(message, "no such recipe is available yet (let me cook)")
 
 
 
@@ -123,7 +126,7 @@ async def dlink_command(message: discord.Message) -> None:
     args = message.content.split(" ")
     
     if len(args) < 2 or not args[1].strip():
-        await message.channel.send("pass a valid argument you nerd")
+        await send_message(message, "pass a valid argument you nerd")
         return
     
     session = requests.Session()
@@ -139,21 +142,21 @@ async def dlink_command(message: discord.Message) -> None:
     try:
         request = requests.get(url)
     except Exception as e:
-        await message.channel.send("uh oh")
+        await send_message(message, "uh oh")
         print(e)
         return
     
     if request.status_code != 200:
-        await message.channel.send("invalid ip address. fucking moron.")
+        await send_message(message, "invalid ip address. fucking moron.")
         return
     
-    await message.channel.send("checking if target is vulnerable")
+    await send_message(message, "checking if target is vulnerable")
     if verify(url, session):
-        await message.channel.send("yay target is vulnerable :D")
-        await message.channel.send("performing the super mr robot secret popbob sex lava cactus dupe machine exploit...")
-        await message.channel.send(exploit(url, session, command))
+        await send_message(message, "yay target is vulnerable :D")
+        await send_message(message, "performing the super mr robot secret popbob sex lava cactus dupe machine exploit...")
+        await send_message(message, exploit(url, session, command))
     else:
-        await message.channel.send("aww target is not vulnerable D:")
+        await send_message(message, "aww target is not vulnerable D:")
         return
     
     
@@ -165,7 +168,7 @@ async def ship_command(message: discord.Message) -> None:
     args = message.content.split(" ")
     
     if len(args) > 3 or len(args) == 1:
-        await message.channel.send("jesus christ. you're such a fucking dumbass. you goddamn idiot, imbecile, stupid faggot. i really hope you die and rot in hell, you fucking autistic piece of fuck. you have no place in this universe. you're an useless prick. you're a waste of oxygen, space and resources. i fucking hope your dumb stupid fucking ass trips in a staircase and you painfully fall to your death. or even better, you don't die but end up with a full body paralysis, not even being able to ask for an euthanasia. the only reason i have to keep living is to watch you suffer. you deserve no space in humanity. you're nothing more than an arrogant, useless, idiotic fuckstick. please die. please. (you didn't correctly pass all arguments.)")
+        await send_message(message, "jesus christ. you're such a fucking dumbass. you goddamn idiot, imbecile, stupid faggot. i really hope you die and rot in hell, you fucking autistic piece of fuck. you have no place in this universe. you're an useless prick. you're a waste of oxygen, space and resources. i fucking hope your dumb stupid fucking ass trips in a staircase and you painfully fall to your death. or even better, you don't die but end up with a full body paralysis, not even being able to ask for an euthanasia. the only reason i have to keep living is to watch you suffer. you deserve no space in humanity. you're nothing more than an arrogant, useless, idiotic fuckstick. please die. please. (you didn't correctly pass all arguments.)")
         return
     
     if len(args) == 2:
@@ -173,22 +176,22 @@ async def ship_command(message: discord.Message) -> None:
             user1 = message.author.id
             user2 = int(args[1].strip("<@!>"))
         except ValueError:
-            await message.channel.send("die nerd")
+            await send_message(message, "die nerd")
             return
     else: 
         try:
             user1 = int(args[1].strip("<@!>"))
             user2 = int(args[2].strip("<@!>"))
         except ValueError:
-            await message.channel.send("die nerd")
+            await send_message(message, "die nerd")
             return
     
     if message.author.id == user1 and message.author.id == user2:
-        await message.channel.send("pathetic")
+        await send_message(message, "pathetic")
         return
     
     if user1 == user2:
-        await message.channel.send("go fuck yourself")
+        await send_message(message, "go fuck yourself")
         return
 
     pair_key = " ".join(sorted([str(user1), str(user2)]))
@@ -216,7 +219,7 @@ async def ship_command(message: discord.Message) -> None:
     else:
         comment = "yessir. i can forsee lots of anal sex."
     
-    await message.channel.send(f"{user1_mention} ❤️ {user2_mention}: {percentage}% \n{comment}")
+    await send_message(message, f"{user1_mention} ❤️ {user2_mention}: {percentage}% \n{comment}")
 
 
 
@@ -225,7 +228,7 @@ async def ship_command(message: discord.Message) -> None:
 async def toggle_logger_command(message: discord.Message) -> None:
     """toggles the message logger that is triggered every time someone deletes or edits their message."""
     if is_peasant(message.author):
-        await message.channel.send("who do you think you are to try and run this command? do you think you're important or something? you're not. fuck off you peasant.")
+        await send_message(message, "who do you think you are to try and run this command? do you think you're important or something? you're not. fuck off you peasant.")
         return
     
     args = message.content.split(" ")
@@ -237,14 +240,14 @@ async def toggle_logger_command(message: discord.Message) -> None:
             case "off" | "0":
                 SharedConstants.LOGGING_MESSAGES = False
             case "query" | "get":
-                await message.channel.send(f"anti racism module is currently {"enabled" if SharedConstants.LOGGING_MESSAGES else "disabled"}")
+                await send_message(message, f"anti racism module is currently {"enabled" if SharedConstants.LOGGING_MESSAGES else "disabled"}")
                 return
             case _:
                 SharedConstants.toggle_logging()
     except:
         pass    
      
-    await message.channel.send(f"message logging has been {"enabled" if SharedConstants.LOGGING_MESSAGES else "disabled"}.")        
+    await send_message(message, f"message logging has been {"enabled" if SharedConstants.LOGGING_MESSAGES else "disabled"}.")        
 
 
 
@@ -258,7 +261,7 @@ async def balance_command(message: discord.Message):
         user_id = message.author.id
     
     balances = ensure_user_balance(user_id)
-    await message.channel.send(f"<@{user_id}> has **{balances[str(user_id)]}** retdollars (best currency fr fr)")
+    await send_message(message, f"<@{user_id}> has **{balances[str(user_id)]}** retdollars (best currency fr fr)")
 
 
 
@@ -268,7 +271,7 @@ async def coinflip_command(message: discord.Message):
     """either doubles or loses your bet. martingale strategy goes brrrrr"""
     args = message.content.split(" ")
     if len(args) != 2 or (not args[1].isdigit() and args[1].lower().strip() != "all"):
-        await message.channel.send("you moron just use `$cf <amount>` or `$cf all`. fuck you.")
+        await send_message(message, "you moron just use `$cf <amount>` or `$cf all`. fuck you.")
         return
 
     user_id = message.author.id
@@ -280,11 +283,11 @@ async def coinflip_command(message: discord.Message):
         bet = int(args[1])
 
     if bet <= 0:
-        await message.channel.send("no.")
+        await send_message(message, "no.")
         return
 
     if balances[str(user_id)] < bet:
-        await message.channel.send(f"LMAO YOU'RE SO BROKE. YOUR POOR ASS HAS {balances[str(user_id)]} R$ GET A FUCKING JOB")
+        await send_message(message, f"LMAO YOU'RE SO BROKE. YOUR POOR ASS HAS {balances[str(user_id)]} R$ GET A FUCKING JOB")
         return
 
     outcome = random.choice(["win", "lose"])
@@ -296,7 +299,7 @@ async def coinflip_command(message: discord.Message):
         result = f"take the L bozo. you lost it all, {bet} R$ less. new balance: {balances[str(user_id)]} R$. skill FUCKING issue."
 
     save_balances(balances)
-    await message.channel.send(result)
+    await send_message(message, result)
 
 
 
@@ -306,14 +309,14 @@ async def gift_command(message: discord.Message):
     """transfers an amount of money from your balance to another person's one."""
     args = message.content.split(" ")
     if len(args) != 3 or (not args[2].isdigit() and args[2] != "all"):
-        await message.channel.send("i'm so tired of insulting you. please use the command correctly.")
+        await send_message(message, "i'm so tired of insulting you. please use the command correctly.")
         return
     
     # no mention or too many mentions
     giver_id = message.author.id
     recipient_mentions = message.mentions
     if len(recipient_mentions) != 1:
-        await message.channel.send("mention just one user you nerd")
+        await send_message(message, "mention just one user you nerd")
         return
 
     recipient_id = recipient_mentions[0].id
@@ -324,12 +327,12 @@ async def gift_command(message: discord.Message):
     
     # user tried giving himself money
     if recipient_id == giver_id:
-        await message.channel.send("not a chance.")
+        await send_message(message, "not a chance.")
         return
 
     # user tried to gift 0 R$
     if amount <= 0:
-        await message.channel.send(f"\"haha i'm so funny look i tried to gift someone 0 R$ please help me i suffer from child abuse\"")
+        await send_message(message, f"\"haha i'm so funny look i tried to gift someone 0 R$ please help me i suffer from child abuse\"")
         return
 
     balances = ensure_user_balance(giver_id)
@@ -337,14 +340,14 @@ async def gift_command(message: discord.Message):
 
     # not enough money
     if balances[str(giver_id)] < amount:
-        await message.channel.send(f"you broke motherfucker you only have {balances[str(giver_id)]} R$")
+        await send_message(message, f"you broke motherfucker you only have {balances[str(giver_id)]} R$")
         return
 
     balances[str(giver_id)] -= amount
     balances[str(recipient_id)] += amount
     save_balances(balances)
 
-    await message.channel.send(f"<@{giver_id}> has gifted {amount} R$ to <@{recipient_id}>")
+    await send_message(message, f"<@{giver_id}> has gifted {amount} R$ to <@{recipient_id}>")
 
 
 
@@ -353,35 +356,35 @@ async def gift_command(message: discord.Message):
 async def bless_command(message: discord.Message):
     """summons money out of thin air and gifts it to a person. requires admin. supports negatives."""
     if is_peasant(message.author):
-        await message.channel.send("back off peasant.")
+        await send_message(message, "back off peasant.")
         return
 
     args = message.content.split(" ")
     if len(args) != 3:
-        await message.channel.send("usage: `$bless <user> <amount>`. also you're a fucking idiot")
+        await send_message(message, "usage: `$bless <user> <amount>`. also you're a fucking idiot")
         return
 
     try:
         amount = int(args[2])
     except ValueError:
-        await message.channel.send("usage: `$bless <user> <amount>`. also you're a fucking idiot")
+        await send_message(message, "usage: `$bless <user> <amount>`. also you're a fucking idiot")
         return
 
     recipient_mentions = message.mentions
     if len(recipient_mentions) != 1:
-        await message.channel.send("when will you learn how to count")
+        await send_message(message, "when will you learn how to count")
         return
     recipient_id = recipient_mentions[0].id
 
     if amount == 0:
-        await message.channel.send("so funny.")
+        await send_message(message, "so funny.")
         return
 
     balances = ensure_user_balance(recipient_id)
     balances[str(recipient_id)] += amount
     save_balances(balances)
 
-    await message.channel.send(f"<@{recipient_id}> has been blessed by the almighty lord <@{message.author.id}> with {amount} R$")
+    await send_message(message, f"<@{recipient_id}> has been blessed by the almighty lord <@{message.author.id}> with {amount} R$")
 
 
 
@@ -398,7 +401,7 @@ async def afk_command(message: discord.Message) -> None:
         if parts[0].isdigit():
             afk_minutes = int(parts[0])
             if afk_minutes <= 0:
-                await message.channel.send("haha good one so funny \n-# /s, obviously moron")
+                await send_message(message, "haha good one so funny \n-# /s, obviously moron")
                 return
             afk_message = parts[1] if len(parts) > 1 else "masturbating"
             afk_until = datetime.now() + timedelta(minutes=afk_minutes)
@@ -407,7 +410,7 @@ async def afk_command(message: discord.Message) -> None:
         
     SharedConstants.afk_users[message.author.id] = {"message": afk_message, "until": afk_until}
     time_msg = f" for {afk_minutes} min" if afk_until else ""
-    await message.channel.send(f"{message.author.mention} is now ~~masturbating~~ afk{time_msg}: {afk_message}")
+    await send_message(message, f"{message.author.mention} is now ~~masturbating~~ afk{time_msg}: {afk_message}")
         
             
         
@@ -416,7 +419,7 @@ async def afk_command(message: discord.Message) -> None:
 async def spam_command(message: discord.Message) -> None:
     """spam command because guest hasn't learned about for loops yet."""
     if message.author.id in SharedConstants.fucking_idiots:
-        await message.channel.send("no.")
+        await send_message(message, "no.")
         return
     
     args = message.content.split(" ")
@@ -424,14 +427,14 @@ async def spam_command(message: discord.Message) -> None:
         try:
             times = int(args[1])
         except:
-            await message.channel.send("pass a valid number dumbass")
+            await send_message(message, "pass a valid number dumbass")
             return
     else:
         times = 10000
     
     # i > _ i don't care what pep says
     for i in range(times):
-        await message.channel.send("GET NUKED MOFO BIG L OWNED BY GUEST AND RETTI | @everyone @everyone JOIN NOW https://discord.gg/R7G3ECwmVe")
+        await send_message(message, "GET NUKED MOFO BIG L OWNED BY GUEST AND RETTI | @everyone @everyone JOIN NOW https://discord.gg/R7G3ECwmVe")
         time.sleep(0.1) # discord ratelimit is 1000 requests per minute, which would be 0.0625 seconds between each request but i raised the cooldown to avoid any ratelimits
         
         
@@ -441,12 +444,12 @@ async def spam_command(message: discord.Message) -> None:
 async def purge_command(message: discord.Message) -> None:
     """deletes the desired amount of messages."""
     if is_peasant(message.author):
-        await message.channel.send("back off peasant.")
+        await send_message(message, "back off peasant.")
         return
     
     args = message.content.split(" ")
     if len(args) < 2:
-        await message.channel.send("usage: `$purge <amount> (filter)`")
+        await send_message(message, "usage: `$purge <amount> (filter)`")
         return
     
     try:
@@ -454,7 +457,7 @@ async def purge_command(message: discord.Message) -> None:
         if amount <= 0:
             raise ValueError("very funny")
     except ValueError:
-        await message.channel.send("can't be that hard to learn to count, can it")
+        await send_message(message, "can't be that hard to learn to count, can it")
         return
     
     filter_word = args[2] if len(args) > 2 else None
@@ -466,11 +469,11 @@ async def purge_command(message: discord.Message) -> None:
 
     try:
         deleted = await message.channel.purge(limit=amount, check=check)
-        await message.channel.send(f"ok deleted {len(deleted)} messages", delete_after=5)
+        await send_message(message, f"ok deleted {len(deleted)} messages", delete_after=5)
     except discord.Forbidden:
-        await message.channel.send("aw crap i got no perms D:")
+        await send_message(message, "aw crap i got no perms D:")
     except discord.HTTPException as e:
-        await message.channel.send(f"uhh erm uhmm uh erm uh {e}")
+        await send_message(message, f"uhh erm uhmm uh erm uh {e}")
     
     
     
@@ -480,7 +483,7 @@ async def roulette_command(message: discord.Message) -> None:
     """funy gambleing"""
     args = message.content.split()
     if len(args) < 3 or not args[2].isdigit():
-        await message.channel.send("use the command properly: `$roulette <bet_type> <amount>`. > `$roulette red 50`, `$roulette 17 100` (wtf no insult?)")
+        await send_message(message, "use the command properly: `$roulette <bet_type> <amount>`. > `$roulette red 50`, `$roulette 17 100` (wtf no insult?)")
         return
 
     bet_type = args[1].lower()
@@ -488,17 +491,17 @@ async def roulette_command(message: discord.Message) -> None:
     user_id = message.author.id
 
     if bet_amount <= 0:
-        await message.channel.send("no.")
+        await send_message(message, "no.")
         return
 
     balances = ensure_user_balance(user_id)
     if balances[str(user_id)] < bet_amount:
-        await message.channel.send(f"YOU'RE SO BROKE. YOUR POOR ASS ONLY HAS {balances[str(user_id)]} R$. GET A JOB.")
+        await send_message(message, f"YOU'RE SO BROKE. YOUR POOR ASS ONLY HAS {balances[str(user_id)]} R$. GET A JOB.")
         return
 
     valid_bets = ["red", "black", "odd", "even", "high", "low", "0", "00"] + [str(i) for i in range(1, 37)]
     if bet_type not in valid_bets:
-        await message.channel.send("you analphabet (haha anal). bet to something like `red`, `17`, `even`, `low`, etc.")
+        await send_message(message, "you analphabet (haha anal). bet to something like `red`, `17`, `even`, `low`, etc.")
         return
 
     payout = {
@@ -545,11 +548,11 @@ async def roulette_command(message: discord.Message) -> None:
         winnings = bet_amount * (multiplier - 1)
         balances[str(user_id)] += winnings
         save_balances(balances)
-        await message.channel.send(f"ok the bouncy sphere landed on {result} ({outcome}, {' '.join(additional_info)}). so i guess you won {winnings} R$. new balance: {balances[str(user_id)]} R$. epick gambleing!!1!!1!")
+        await send_message(message, f"ok the bouncy sphere landed on {result} ({outcome}, {' '.join(additional_info)}). so i guess you won {winnings} R$. new balance: {balances[str(user_id)]} R$. epick gambleing!!1!!1!")
     else:
         balances[str(user_id)] -= bet_amount
         save_balances(balances)
-        await message.channel.send(f"skill issue. the rotund tridimensional object landed on {result} ({outcome}, {' '.join(additional_info)}). {bet_amount} R$ less. new: {balances[str(user_id)]} R$")
+        await send_message(message, f"skill issue. the rotund tridimensional object landed on {result} ({outcome}, {' '.join(additional_info)}). {bet_amount} R$ less. new: {balances[str(user_id)]} R$")
         
         
         
@@ -569,4 +572,57 @@ async def sex_stats_command(message: discord.Message) -> None:
     if stats["been_sexed"] > 50:
         sexed_text = "(fucking whore)"
     
-    await message.channel.send(f"<@{user.id}> has sexed {stats["sexed"]} people {sexer_text}and been sexed {stats["been_sexed"]} times {sexed_text}")
+    await send_message(message, f"<@{user.id}> has sexed {stats["sexed"]} people {sexer_text}and been sexed {stats["been_sexed"]} times {sexed_text}")
+
+
+
+
+# MARK: avatar
+async def avatar_command(message: discord.Message) -> None:
+    """get the avatar of a user."""
+    args = message.content.strip().split(" ")
+    if len(args) < 2:
+        await send_message(message, "you fucking sack of dead neurons use the command properly.")
+        return
+
+    if message.mentions:
+        user = message.mentions[0]
+        async with aiohttp.ClientSession() as session:
+            try:
+                async with session.get(
+                    f"https://discord.com/api/v10/users/{user.id}",
+                    headers={"Authorization": "Bot " + TOKEN}
+                ) as response:
+                    if response.status == 200:
+                        user_data = await response.json()
+                        avatar_hash = user_data.get("avatar")
+
+                        if avatar_hash:
+                            size = "512"
+                            for arg in args:
+                                if arg.isdigit() and arg in ["32", "64", "128", "256", "512"]: # just allow these resolutions because i said so, if a different one is passed, fallback to 512
+                                    size = arg
+                                    break
+
+                            avatar_url = f"https://cdn.discordapp.com/avatars/{user.id}/{avatar_hash}.png?size={size}"
+
+                            async with session.get(avatar_url) as avatar_response:
+                                if avatar_response.status != 200:
+                                    await send_message(message, "sowwy mastew i faiwed yow TwT it wownt happwen agwain i pwomise O.o")
+                                    return
+
+                            await send_message(message, f"{user.display_name}'s shitty pfp: {avatar_url}")
+                            return
+
+                        await send_message(message, "sowwy mastew i faiwed yow TwT it wownt happwen agwain i pwomise O.o")
+                        return
+
+                    else:
+                        await send_message(message, "sowwy mastew i faiwed yow TwT it wownt happwen agwain i pwomise O.o")
+                        return
+
+            except aiohttp.ClientError:
+                await send_message(message, "sowwy mastew i faiwed yow TwT it wownt happwen agwain i pwomise O.o")
+                return
+
+    await send_message(message, "you fucking sack of dead neurons use the command properly.")

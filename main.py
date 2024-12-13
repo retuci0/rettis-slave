@@ -1,11 +1,12 @@
 import commands
+import copy
 import datetime
 import discord
 import traceback
 
 from colorama import Fore
 
-from utils import SharedConstants, has_prefix
+from utils import SharedConstants, has_prefix, send_message
 from super_secret_token import TOKEN
 
 intents = discord.Intents.default()
@@ -39,7 +40,7 @@ async def on_message(message: discord.Message) -> None:
         # afk thingy
         if message.author.id in SharedConstants.afk_users:
             del SharedConstants.afk_users[message.author.id]
-            await message.channel.send(f"welcum back <@{message.author.id}>, how did the masturbation go sir")
+            await send_message(message, f"welcum back <@{message.author.id}>, how did the masturbation go sir")
             
         # mentioning an afk person
         for mentioned_user in message.mentions:
@@ -51,67 +52,76 @@ async def on_message(message: discord.Message) -> None:
                 if expiration and datetime.datetime.now() > expiration:
                     del SharedConstants.afk_users[mentioned_user.id]
                 else:
-                    await message.channel.send(f"{mentioned_user.mention} is masturbating or supposedly: {afk_msg}")
+                    await send_message(message, f"{mentioned_user.mention} is masturbating or supposedly: {afk_msg}")
         
         # ignore normal messages
         if not message.content.startswith("$"):
+            return
+
+        content = copy.copy(message)
+        content.content = content.content.lower()
+
+        # commands
+        if has_prefix(content, "$help"):
+            await commands.help_command(message)
+
+        elif has_prefix(content, "$sex"):
+            await commands.sex_command(message)
+        
+        elif has_prefix(content, "$recipe"):
+            await commands.recipe_command(message)
+            
+        elif has_prefix(content, "$rape"):
+            await commands.dlink_command(message)
+        
+        elif has_prefix(content, "$ship"):
+            await commands.ship_command(message)
+        
+        elif has_prefix(content, "$togglelogger"):
+            await commands.toggle_logger_command(message)
+        
+        elif has_prefix(content, "$balance") or has_prefix(message, "$bal"):
+            await commands.balance_command(message)
+        
+        elif has_prefix(content, "$coinflip") or has_prefix(message, "$cf"):
+            await commands.coinflip_command(message)
+        
+        elif has_prefix(content, "$gift"):
+            await commands.gift_command(message)
+        
+        elif has_prefix(content, "$bless"):
+            await commands.bless_command(message)
+        
+        elif has_prefix(content, "$afk"):
+            await commands.afk_command(message)
+        
+        elif has_prefix(content, "$spam"):
+            await commands.spam_command(message)
+        
+        elif has_prefix(content, "$purge"):
+            await commands.purge_command(message)
+        
+        elif has_prefix(content, "$roulette"):
+            await commands.roulette_command(message)
+        
+        elif has_prefix(content, "$sexquery"):
+            await commands.sex_stats_command(message)
+        
+        elif has_prefix(content, "$avatar"):
+            await commands.avatar_command(message)
+        
+        else:
             return
         
         # to find out who the fuck is spamming the bot
         # i refuse to use logging module
         print(f"{Fore.RESET}[LOG] {Fore.GREEN}{message.author.display_name} ({message.author.name}) {Fore.RESET}used {Fore.CYAN}{message.content} {Fore.RESET}on {Fore.MAGENTA}{message.guild.name}{Fore.RESET}")
-
-        # commands
-        if has_prefix(message, "$help"):
-            await commands.help_command(message)
-
-        if has_prefix(message, "$sex"):
-            await commands.sex_command(message)
-        
-        if has_prefix(message, "$recipe"):
-            await commands.recipe_command(message)
-            
-        if has_prefix(message, "$rape"):
-            await commands.dlink_command(message)
-        
-        if has_prefix(message, "$ship"):
-            await commands.ship_command(message)
-        
-        if has_prefix(message, "$togglelogger"):
-            await commands.toggle_logger_command(message)
-        
-        if has_prefix(message, "$balance") or has_prefix(message, "$bal"):
-            await commands.balance_command(message)
-        
-        if has_prefix(message, "$coinflip") or has_prefix(message, "$cf"):
-            await commands.coinflip_command(message)
-        
-        if has_prefix(message, "$gift"):
-            await commands.gift_command(message)
-        
-        if has_prefix(message, "$bless"):
-            await commands.bless_command(message)
-        
-        if has_prefix(message, "$afk"):
-            await commands.afk_command(message)
-        
-        if has_prefix(message, "$spam"):
-            await commands.spam_command(message)
-        
-        if has_prefix(message, "$purge"):
-            await commands.purge_command(message)
-        
-        if has_prefix(message, "$roulette"):
-            await commands.roulette_command(message)
-        
-        if has_prefix(message, "$sexquery"):
-            await commands.sex_stats_command(message)
             
     except Exception as e:  # let the users know it broke
         if not isinstance(e, KeyboardInterrupt):
             tb = traceback.format_exc()
             print(f"uhhhh we just got a(n) {type(e).__name__}: {e}\n{tb}")
-            await message.channel.send("uh oh")
+            await send_message(message, "uh oh")
     
 @client.event
 async def on_message_delete(message: discord.Message) -> None:
@@ -125,17 +135,13 @@ async def on_message_delete(message: discord.Message) -> None:
     content = message.content
     if message.attachments:
         for attachment in message.attachments:
-            await message.channel.send(f"<@{message.author.id}> imagine trying to delete {attachment.url}")
+            await send_message(message, f"<@{message.author.id}> imagine trying to delete {attachment.url}")
     
     # ignore attachment only messages
     if not content.strip():
         return
 
-    if len(content) > 3000:
-        await message.channel.send(f"<@{message.author.id}> fuck you")
-        return
-    
-    await message.channel.send(f"<@{message.author.id}> DELETED A MESSAGE! LMAO. YOU REALLY THOUGHT DELETING \"{content}\" WOULD WORK? HA. NO. STUPID FUCK. I HOPE YOU DIE.")
+    await send_message(message, f"<@{message.author.id}> DELETED A MESSAGE! LMAO. YOU REALLY THOUGHT DELETING \"{content}\" WOULD WORK? HA. NO. STUPID FUCK. I HOPE YOU DIE.")
 
 @client.event
 async def on_message_edit(old_message: discord.Message, message: discord.Message) -> None:
@@ -149,16 +155,15 @@ async def on_message_edit(old_message: discord.Message, message: discord.Message
     content = old_message.content
     if message.attachments:
         for attachment in message.attachments:
-            await message.channel.send(f"<@{message.author.id}> imagine trying to delete {attachment.url}")
+            await send_message(message, f"<@{message.author.id}> imagine trying to delete {attachment.url}")
             
     if not content.strip():
         return
 
-    if len(content) >= 2000:
-        await message.channel.send(f"<@{message.author.id}> fuck you")
-        return
-    
-    await message.reply(f"<@{message.author.id}> edited this message because he has severe autism \nold content: \"{content}\"")
+    try:
+        await message.reply(f"<@{message.author.id}> edited this message because he has severe autism \nold content: \"{content}\"")
+    except discord.errors.HTTPException:
+        await send_message(message, "imagine trying to get me to log a message longer than i can send. rot in hell bitch.")
 
 
 if __name__ == "__main__":
