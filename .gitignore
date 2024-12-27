@@ -7,3 +7,8 @@ super_secret_token.py
 balances.json
 sex_counts.json
 ships.json
+.ropeproject/
+.idea/
+inventories.json
+items.py # because it also has some "unusual" content
+.venv/

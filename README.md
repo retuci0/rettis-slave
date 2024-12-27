@@ -11,10 +11,16 @@ if a command returns "uh oh" means it errored the fuck out.
 ## other stuff it can do
 
 - nothing much else but has a message logger, can be toggled with `$togglelogger`
-- also logs attachments now
+- also logs attachments now (kinda broken)
 - message logger is on by default, toggle with `$togglelogger`
 
 - it can also log all commands now, in the console. might add a .log file later on.
+
+- it also has a separate self checkout bot because waldo asked me to make one. the balances are synced.
+
+to make this one work, add `CHECKOUT_TOKEN = <your other bot token here>` to the `super_secret_token.py` file, and add your items into a dict in a `items.py` file.
+
+the dict should look like `ITEMS = {"name of item", <price of item>, ...}`
 
 ## usage
 1. clone the repo

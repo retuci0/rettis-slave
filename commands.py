@@ -10,9 +10,11 @@ from dlink_thingy import exploit, verify
 from data import ensure_user_balance, load_balances, save_balances, load_sex_counts, save_sex_counts, load_ships, save_ships
 from help_texts import info, text
 from recipes import recipes
-from utils import SharedConstants, is_peasant, send_message
+from utils import SharedConstants, is_peasant, safe_eval, send_message
 
 from super_secret_token import TOKEN
+
+from utils import SharedConstants
 
 # i should probably comment some stuff or at the very least organize it
 # but nah
@@ -89,7 +91,12 @@ async def sex_command(message: discord.Message) -> None:
     
     # funny
     if random.randint(1, 11) == 11:
+        amount = random.randint(10, 100)
         await send_message(message, "https://cdn.discordapp.com/attachments/1312208805097898004/1315651481973686333/poundtown-hip-thrust.mov?ex=67582f6c&is=6756ddec&hm=97b04f47923793489e0244d0216d170737efe82215c612d0b7668490625d16c8&")
+        await send_message(message, f"you've been rewarded with {amount} R$ because you're a whore!")
+        balances = ensure_user_balance(message.author.id)
+        balances[str(message.author.id)] += amount
+        save_balances(balances)
 
 
 
@@ -232,9 +239,13 @@ async def toggle_logger_command(message: discord.Message) -> None:
         return
     
     args = message.content.split(" ")
-    
     try:
-        match args[1].lower():
+        arg = args[1].lower() if args[1] else "a"
+    except IndexError:
+        arg = "a"
+
+    try:
+        match arg:
             case "on" | "1":
                 SharedConstants.LOGGING_MESSAGES = True
             case "off" | "0":
@@ -354,20 +365,22 @@ async def gift_command(message: discord.Message):
 
 # MARK: bless
 async def bless_command(message: discord.Message):
-    """summons money out of thin air and gifts it to a person. requires admin. supports negatives."""
+    """summons money out of thin air and gifts it to a person. requires admin. supports negatives and basic math operations (1+1, etc.)."""
     if is_peasant(message.author):
         await send_message(message, "back off peasant.")
         return
 
-    args = message.content.split(" ")
+    args = message.content.split(" ", 2)
     if len(args) != 3:
         await send_message(message, "usage: `$bless <user> <amount>`. also you're a fucking idiot")
         return
 
     try:
-        amount = int(args[2])
-    except ValueError:
-        await send_message(message, "usage: `$bless <user> <amount>`. also you're a fucking idiot")
+        amount = float(safe_eval(args[2]))
+        if not (amount > -float("inf") and amount < float("inf")): # because waldo
+            raise ValueError
+    except (ValueError, OverflowError):
+        await send_message(message, "invalid amount. usage: `$bless <user> <amount>`.")
         return
 
     recipient_mentions = message.mentions
@@ -376,15 +389,59 @@ async def bless_command(message: discord.Message):
         return
     recipient_id = recipient_mentions[0].id
 
-    if amount == 0:
+    balances = ensure_user_balance(recipient_id)
+
+    if balances[str(recipient_id)] + amount > SharedConstants.MAX_BALANCE:
+        await send_message(message, "this blessing would exceed the maximum allowable balance. no greed.")
+        return
+
+    if amount == 0 or abs(amount) >= 1e+9:
         await send_message(message, "so funny.")
         return
 
-    balances = ensure_user_balance(recipient_id)
     balances[str(recipient_id)] += amount
     save_balances(balances)
 
     await send_message(message, f"<@{recipient_id}> has been blessed by the almighty lord <@{message.author.id}> with {amount} R$")
+
+
+
+
+# MARK: setbal
+async def setbal_command(message: discord.Message) -> None:
+    """sets the balance of a user to the desired amount. requires admin"""
+    if is_peasant(message.author):
+        await send_message(message, "back off peasant.")
+        return
+
+    args = message.content.split(" ", 2)
+    if len(args) != 3:
+        await send_message(message, "usage: `$setbal <user> <amount>`. also you're a fucking idiot")
+        return
+
+    try:
+        amount = float(safe_eval(args[2]))
+        if not (amount > -float("inf") and amount < float("inf")):
+            raise ValueError
+    except (ValueError, OverflowError):
+        await send_message(message, "invalid amount. usage: `$setbal <user> <amount>`.")
+        return
+
+    if amount > SharedConstants.MAX_BALANCE:
+        await send_message(message, "the balance cannot exceed the maximum allowable limit.")
+        return
+
+    recipient_mentions = message.mentions
+    if len(recipient_mentions) != 1:
+        await send_message(message, "when will you learn how to count")
+        return
+    recipient_id = recipient_mentions[0].id
+
+    balances = ensure_user_balance(recipient_id)
+    balances[str(recipient_id)] = amount
+    save_balances(balances)
+
+    await send_message(message, f"the balance of <@{recipient_id}> has been fixed to {amount} R$ by the almighty lord <@{message.author.id}>")
 
 
 
@@ -469,7 +526,7 @@ async def purge_command(message: discord.Message) -> None:
 
     try:
         deleted = await message.channel.purge(limit=amount, check=check)
-        await send_message(message, f"ok deleted {len(deleted)} messages", delete_after=5)
+        await send_message(message, f"ok deleted {len(deleted)} messages", delete_after=3)
     except discord.Forbidden:
         await send_message(message, "aw crap i got no perms D:")
     except discord.HTTPException as e:
@@ -626,3 +683,13 @@ async def avatar_command(message: discord.Message) -> None:
                 return
 
     await send_message(message, "you fucking sack of dead neurons use the command properly.")
+
+
+
+
+# MARK: waldo
+async def state_command(message: discord.Message) -> None:
+    """send your state in the rettibot hierarchy."""
+    """returns the state of the bot."""
+    await send_message(message, f"op: {message.author.id in SharedConstants.dildos or message.author.id == SharedConstants.the_almighty_retucio_user_id}")
+    await send_message(message, f"peasant: {message.author.id in SharedConstants.fucking_idiots}")

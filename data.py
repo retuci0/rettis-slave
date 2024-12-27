@@ -14,7 +14,7 @@ def save_balances(balances):
     with open("balances.json", "w") as f:
         json.dump(balances, f, indent=4)
 
-def ensure_user_balance(user_id):
+def ensure_user_balance(user_id: int):
     balances = load_balances()
     if str(user_id) not in balances:
         balances[str(user_id)] = 100
@@ -50,3 +50,18 @@ def load_ships():
 def save_ships(data):
     with open("ships.json", "w") as f:
         json.dump(data, f, indent=4)
+
+
+# INVENTORIES
+def load_inventories():
+    try:
+        with open("inventories.json", "r") as f:
+            return json.load(f)
+    except FileNotFoundError:
+        with open("inventories.json", "w") as f:
+            f.write("{}")
+        return {}
+
+def save_inventories(inventories):
+    with open("inventories.json", "w") as f:
+        json.dump(inventories, f, indent=4)
