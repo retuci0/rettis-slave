@@ -9,9 +9,9 @@ from colorama import Fore
 from utils import SharedConstants, has_prefix, send_message
 from super_secret_token import TOKEN
 
+
 intents = discord.Intents.default()
 intents.message_content = True
-
 client = SharedConstants.client
 
 @client.event
@@ -37,10 +37,11 @@ async def on_message(message: discord.Message) -> None:
         if "nuh uh" in message.content.lower():
             await message.reply("yuh uh")
 
-        # afk thingy
+        # afk time is up
         if message.author.id in SharedConstants.afk_users:
-            del SharedConstants.afk_users[message.author.id]
-            await send_message(message, f"welcum back <@{message.author.id}>, how did the masturbation go sir")
+            afk_until = SharedConstants.afk_users[message.author.id]["until"] or None
+            if afk_until and datetime.datetime.now() > afk_until:
+                del SharedConstants.afk_users[message.author.id]
 
         # mentioning an afk person
         for mentioned_user in message.mentions:
@@ -53,6 +54,12 @@ async def on_message(message: discord.Message) -> None:
                     del SharedConstants.afk_users[mentioned_user.id]
                 else:
                     await send_message(message, f"{mentioned_user.mention} is masturbating or supposedly: {afk_msg}")
+        
+        # afk thingy
+        if message.author.id in SharedConstants.afk_users:
+            del SharedConstants.afk_users[message.author.id]
+            await send_message(message, f"welcum back <@{message.author.id}>, how did the masturbation go sir")
+
 
         # ignore normal messages
         if not message.content.startswith("$"):

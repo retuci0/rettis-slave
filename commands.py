@@ -16,16 +16,16 @@ from super_secret_token import TOKEN
 
 from utils import SharedConstants
 
-# i should probably comment some stuff or at the very least organize it
-# but nah
-
 # holy shit i've been looking at my code and it's so messy
 # who the fuck wrote this
 # /s
 
+# i will try to follow pep8 guidelines from now on
+
 # for those who don't know what "# MARK" means, it just makes the text following it appear bigger on the vscode minimap, making the code easier to navigate. it does not mean my name is mark.
 
-
+# also, i don't give a shit about your "ew your bot is bad it uses an outdated way to operate commands" or "imagine using json as database", these comments will just
+# further encourage me to do the things above just to piss y'all off
 
 # MARK: help
 async def help_command(message: discord.Message) -> None:
@@ -449,7 +449,7 @@ async def setbal_command(message: discord.Message) -> None:
 # MARK: afk
 async def afk_command(message: discord.Message) -> None:
     """sets you as afk, if you're afk when someone pings you they will be reminded you're afk."""
-    content = message.content[len("$afk"):].strip() # i felt fancy alr
+    content = message.content[len("$afk"):].strip()
     afk_message = "masturbating"
     afk_until = None
     
@@ -638,58 +638,51 @@ async def sex_stats_command(message: discord.Message) -> None:
 async def avatar_command(message: discord.Message) -> None:
     """get the avatar of a user."""
     args = message.content.strip().split(" ")
-    if len(args) < 2:
-        await send_message(message, "you fucking sack of dead neurons use the command properly.")
-        return
 
     if message.mentions:
         user = message.mentions[0]
-        async with aiohttp.ClientSession() as session:
-            try:
-                async with session.get(
-                    f"https://discord.com/api/v10/users/{user.id}",
-                    headers={"Authorization": "Bot " + TOKEN}
-                ) as response:
-                    if response.status == 200:
-                        user_data = await response.json()
-                        avatar_hash = user_data.get("avatar")
+    else:
+        user = message.author
 
-                        if avatar_hash:
-                            size = "512"
-                            for arg in args:
-                                if arg.isdigit() and arg in ["32", "64", "128", "256", "512"]: # just allow these resolutions because i said so, if a different one is passed, fallback to 512
-                                    size = arg
-                                    break
+    async with aiohttp.ClientSession() as session:  # nesting goes brrrrr
+        try:
+            async with session.get(
+                f"https://discord.com/api/v10/users/{user.id}",
+                headers={"Authorization": "Bot " + TOKEN}
+            ) as response:
+                if response.status == 200:
+                    user_data = await response.json()
+                    avatar_hash = user_data.get("avatar")
 
-                            avatar_url = f"https://cdn.discordapp.com/avatars/{user.id}/{avatar_hash}.png?size={size}"
+                    if avatar_hash:
+                        size = "512"
+                        for arg in args:
+                            if arg.isdigit() and arg in ["32", "64", "128", "256", "512"]: # just allow these resolutions because i said so, if a different one is passed, fallback to 512
+                                size = arg
+                                break
 
-                            async with session.get(avatar_url) as avatar_response:
-                                if avatar_response.status != 200:
-                                    await send_message(message, "sowwy mastew i faiwed yow TwT it wownt happwen agwain i pwomise O.o")
-                                    return
+                        avatar_url = f"https://cdn.discordapp.com/avatars/{user.id}/{avatar_hash}.png?size={size}"
 
-                            await send_message(message, f"{user.display_name}'s shitty pfp: {avatar_url}")
-                            return
+                        async with session.get(avatar_url) as avatar_response:
+                            if avatar_response.status != 200:
+                                await send_message(message, "sowwy mastew i faiwed yow TwT it wownt happwen agwain i pwomise O.o")
+                                return
 
-                        await send_message(message, "sowwy mastew i faiwed yow TwT it wownt happwen agwain i pwomise O.o")
+                        await send_message(message, f"{user.display_name}'s shitty pfp: {avatar_url}")
                         return
 
-                    else:
-                        await send_message(message, "sowwy mastew i faiwed yow TwT it wownt happwen agwain i pwomise O.o")
-                        return
+                raise aiohttp.ClientError("nuke greenland")  # :)
 
-            except aiohttp.ClientError:
-                await send_message(message, "sowwy mastew i faiwed yow TwT it wownt happwen agwain i pwomise O.o")
-                return
-
-    await send_message(message, "you fucking sack of dead neurons use the command properly.")
+        except aiohttp.ClientError:
+            await send_message(message, "sowwy mastew i faiwed yow TwT it wownt happwen agwain i pwomise O.o") # please ignore this, i don't want to talk about it
+            return
 
 
 
 
-# MARK: waldo
+# MARK: hierarchy
 async def state_command(message: discord.Message) -> None:
     """send your state in the rettibot hierarchy."""
-    """returns the state of the bot."""
-    await send_message(message, f"op: {message.author.id in SharedConstants.dildos or message.author.id == SharedConstants.the_almighty_retucio_user_id}")
+    await send_message(message, f"a literal god: {message.author.id == SharedConstants.the_almighty_retucio_user_id}")
+    await send_message(message, f"dildo: {message.author.id in SharedConstants.dildos}")
     await send_message(message, f"peasant: {message.author.id in SharedConstants.fucking_idiots}")
